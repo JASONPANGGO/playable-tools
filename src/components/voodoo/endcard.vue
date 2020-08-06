@@ -4,8 +4,8 @@
       <v-flex>
         <v-container>
           <el-form>
-            <el-form-item label="粘贴地址" class="item">
-              <el-input v-model="form.name"></el-input>
+            <el-form-item label="附件地址" class="item">
+              <el-input v-model="url"></el-input>
             </el-form-item>
             <el-form-item>
               <el-button type="primary" @click="onSubmit">生成基础包</el-button>
@@ -18,20 +18,38 @@
 </template>
 
 <script>
+import { getVoodooEndcard } from "../../service/index.js";
+
 export default {
   name: "voodooEndcard",
   components: {},
   data() {
     return {
-      input: "",
-      form: {
-        name: ""
-      }
+      url: ""
     };
   },
   methods: {
-    onSubmit() {}
-  }
+    async onSubmit() {
+      this.uploading = true;
+      const res = await getVoodooEndcard(this.url)
+        .then((e) => {
+          let url = window.URL.createObjectURL(new Blob([e.data]));
+          let link = document.createElement("a");
+          link.style.display = "none";
+          link.href = url;
+          link.setAttribute("download", "voodoo.zip"); // 自定义下载文件名（如exemple.txt）
+          document.body.appendChild(link);
+          link.click();
+        })
+        .catch((err) => {
+          console.log(err);
+        })
+        .finally(() => {
+          this.uploading = false;
+        });
+      console.log(res);
+    },
+  },
 };
 </script>
 
